@@ -132,3 +132,144 @@ void loop()
   }
   delay(200);
 }
+program 5 - SOIL MOISTURE
+
+#define SENSOR_PIN A0
+#define DRY_VALUE 650
+#define WET_VALUE 300
+void setup()
+{
+  Serial.begin(9600);
+}
+void loop()
+{
+  int sensorValue = analogRead(SENSOR_PIN);
+  int moisturePercentage = map(sensorValue, DRY_VALUE, WET_VALUE, 0, 100);
+  moisturePercentage=constrain(moisturePercentage, 0, 100);
+  Serial.print("Soil Moisture:");
+  Serial.print(moisturePercentage);
+  Serial.println("%");
+  delay(1000);
+}
+
+
+program 6 -LDR
+
+
+const int ledPin = 2;
+const int ldrPin = A0;
+void setup()
+{
+  Serial.begin(9600);
+  pinMode(ledPin, OUTPUT);
+  pinMode(ldrPin, INPUT);
+}
+void loop()
+{
+  int ldrStatus =analogRead(ldrPin);
+  if(ldrStatus <= 700)
+{
+digitalWrite(ledPin,HIGH);
+Serial.print("Tts DARK,The LED is Turned ON:");
+Serial.println(ldrStatus);
+}
+else
+{
+  digitalWrite(ledPin,LOW);
+  Serial.print("Its BRIGHT,The LED is Turned OFF : ");
+  Serial.println(ldrStatus);
+}
+delay(500);
+}
+
+PROGRAM 7- LED PUSH BUTTON
+
+int ledPin = 12;
+int switchPin = 2;
+int val =0;
+void setup()
+{
+  pinMode(ledPin,OUTPUT);
+  pinMode(switchPin,INPUT);
+  Serial.begin(9600);
+}
+void loop(){
+  val=digitalRead(switchPin);
+  if(val==HIGH)
+  {
+    digitalWrite(ledPin,HIGH);
+    Serial.println("Button is pressed,LED is ON");
+  }
+  else
+ {
+  digitalWrite(ledPin,LOW);
+  Serial.println("Button is released,LED is OFF");
+ }
+ delay(500);
+}
+
+PROGRAM 8 ULTRASONIC
+
+const int trigpin = 9;
+const int echopin = 10;
+float duration, distance;
+void setup()
+{
+  pinMode (trigpin, OUTPUT);
+  pinMode (echopin, INPUT);
+  Serial.begin(9600);
+}
+void loop()
+{
+  digitalWrite(trigpin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigpin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigpin, LOW);
+  duration = pulseIn(echopin, HIGH);
+  distance = (duration*.0343)/2;
+  Serial.print("Distance:");
+  Serial.println(distance);
+  delay(100);
+}
+
+PROGRAM :09 THINK SPEAK (UPLOAD)
+
+#include <ThingSpeak.h>
+#include <ESP8266WiFi.h>
+#include <SoftwareSerial.h>
+#include <DHT.h>
+#define DHTTYPE DHT11
+#define DHTPin D5
+DHT dht(DHTPin, DHTTYPE);
+unsigned long ch_no=2977994;
+const char*write_api="FZIBCN851H9Q3PGI";
+char ssid[]="SMILE";
+char pass[]="SMILE123";
+volatile float temperature=0,humidity=0;
+WiFiClient client;
+void setup()
+{
+  pinMode(DHTPin,INPUT);
+  Serial.begin(9600);
+  WiFi.begin(ssid,pass);
+  while(WiFi.status()!=WL_CONNECTED)
+ {
+  delay(500);
+  Serial.print(".");
+ }
+ Serial.println("WiFi connected");
+ Serial.println(WiFi.localIP());
+ ThingSpeak.begin(client);
+}
+void loop()
+{
+  temperature=dht.readTemperature();
+  humidity=dht.readHumidity();
+  Serial.print("temperature="),Serial.print(temperature),Serial.println("Degree celcius");
+  Serial.print("Humidity="),Serial.print(humidity),Serial.println("%RH");
+  ThingSpeak.setField(1,humidity);
+  ThingSpeak.setField(2,temperature);
+  ThingSpeak.writeFields(ch_no,write_api);
+  delay(5000);
+}
