@@ -1,0 +1,62 @@
+#include <DHT.h>                   
+#include <ESP8266WiFi.h> 
+#include <OneWire.h> 
+#include "Adafruit_MQTT.h" 
+#include "Adafruit_MQTT_Client.h" 
+#define SSID "Realme             
+#define  PASSWORD "12345678" 
+#define AIO_SERVER "io.adafruit.com" 
+#define AIO_SERVERPORT  1883 
+#define AIO_USERNAME "USERNAME"           
+#define AIO_KEY "Arduino key"                       
+WiFiClient client;  
+Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME,AIO_KEY);  
+Adafruit_MQTT_Subscribe temp = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/temperature"); 
+Adafruit_MQTT_Subscribe humidity = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME"/feeds/humidity"); 
+
+void setup() { 
+Serial.begin(115200);
+delay(10); 
+WiFi.begin(SSID,PASSWORD);
+Serial.print(F("Connecting to "));
+Serial.println(F("Adafruit IO Example")); 
+Serial.println(SSID); 
+while (WiFi.status() != WL_CONNECTED) { 
+delay(500); 
+Serial.print(F(".")); 
+} 
+Serial.println();                                                                                                                                                                            
+Serial.println("WiFi connected"); 
+Serial.println(F("IP address: ")); 
+Serial.println(WiFi.localIP()); 
+mqtt.subscribe(&temp);
+mqtt.subscribe(&humidity);
+}  
+void connect()  
+{ 
+int8_t ret; 
+if (mqtt.connected())  
+{ 
+return; 
+} 
+Serial.print("Connecting to MQTT... "); 
+while ((ret = mqtt.connect()) != 0) {
+Serial.println(mqtt.connectErrorString(ret)); 
+Serial.println("Retrying MQTT connection in 5 seconds..."); 
+mqtt.disconnect(); 
+delay(5000);
+}   
+Serial.println("MQTT Connected!");
+} 
+void loop() { 
+connect(); 
+Adafruit_MQTT_Subscribe *Subscription;
+while ((Subscription= mqtt.readSubcription(5000)))
+{
+ if(Subscription==&temp)
+  {
+    Serial.print(F("recived temperature value is in degree celcius="));
+    Serial.println((float)atof((char*)temp.lastread));
+   
+  }
+}
