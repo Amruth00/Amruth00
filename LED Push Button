@@ -1,0 +1,23 @@
+int ledPin = 12;
+int switchPin = 2;
+int val =0;
+void setup()
+{
+  pinMode(ledPin,OUTPUT);
+  pinMode(switchPin,INPUT);
+  Serial.begin(9600);
+}
+void loop(){
+  val=digitalRead(switchPin);
+  if(val==HIGH)
+  {
+    digitalWrite(ledPin,HIGH);
+    Serial.println("Button is pressed,LED is ON");
+  }
+  else
+ {
+  digitalWrite(ledPin,LOW);
+  Serial.println("Button is released,LED is OFF");
+ }
+ delay(500);
+}
