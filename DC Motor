@@ -1,0 +1,24 @@
+#define BUTTON_PIN 7
+#define MT_RELAY_PIN 3
+void setup()
+{
+  Serial.begin(9600);
+  pinMode(BUTTON_PIN, INPUT);
+  pinMode(MT_RELAY_PIN,OUTPUT);
+}
+void loop()
+{
+  int buttonState = digitalRead(BUTTON_PIN);
+  if (buttonState == HIGH)
+  {
+    Serial.println("The button is being pressed, the motar is ON");
+    digitalWrite(MT_RELAY_PIN,HIGH);
+  }
+  else
+  if (buttonState == LOW)
+  {
+    Serial.println("The button is released,The motor is OFF");
+    digitalWrite(MT_RELAY_PIN, LOW);
+  }
+  delay(200);
+}
