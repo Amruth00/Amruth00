@@ -1,0 +1,17 @@
+#define SENSOR_PIN A0
+#define DRY_VALUE 650
+#define WET_VALUE 300
+void setup()
+{
+  Serial.begin(9600);
+}
+void loop()
+{
+  int sensorValue = analogRead(SENSOR_PIN);
+  int moisturePercentage = map(sensorValue, DRY_VALUE, WET_VALUE, 0, 100);
+  moisturePercentage=constrain(moisturePercentage, 0, 100);
+  Serial.print("Soil Moisture:");
+  Serial.print(moisturePercentage);
+  Serial.println("%");
+  delay(1000);
+}
