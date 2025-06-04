@@ -1,52 +1,42 @@
 #include <DHT.h>
-#include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+
 #define DHTPIN 3
 #define DHTTYPE DHT11
 #define SCREEN_WIDTH 128
-#define SCREEN_HIGHT 32
-#define OLED_RESET    -1
-#define SCREEN_ADDRESS 0x3c
-float temperature=0, humidity=0;
+#define SCREEN_HEIGHT 32
+#define OLED_RESET -1
+#define SCREEN_ADDRESS 0x3C
+
 DHT dht(DHTPIN, DHTTYPE);
-Adafruit_SSD1306 display(SCREEN_WIDTH,SCREEN_HIGHT, &Wire, OLED_RESET);
-void setup()
-{
-   dht.begin();
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
+void setup() {
   Serial.begin(9600);
-  if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS))
-  {
-    Serial.println(F("SSD1306 allocation failed"));
-    for(;;); 
+  dht.begin();
+  if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
+    Serial.println("SSD1306 allocation failed");
+    while (1);
   }
-  display.display();
-  delay(2000);
   display.clearDisplay();
   display.setTextColor(SSD1306_WHITE);
-  
 }
-void loop()
-{
-  humidity =dht.readHumidity();
-  temperature =dht.readTemperature();
+
+void loop() {
+  float h = dht.readHumidity();
+  float t = dht.readTemperature();
+
   display.clearDisplay();
   display.setTextSize(1);
   display.setCursor(0, 0);
-  display.print("dht11 Sensor");
-  display.setCursor(0, 10);
-  display.print(" % R H =");
-  display.print(humidity);
-  display.setCursor(0, 20);
-  display.print("Temp(Deg C) = ");
-  display.print(temperature);
+  display.print("Humidity: "); display.print(h); display.println(" %");
+  display.print("Temp: "); display.print(t); display.println(" C");
   display.display();
-  Serial.print("Relative Humidity % :");Serial.println(humidity);
-  Serial.print("Temperature in degree celcius:");Serial.println(temperature);
-  delay(5000);
-  delay(3000);
-  display.clearDisplay();
-  delay(2000);
-}
 
+  Serial.print("Humidity: "); Serial.print(h); Serial.print(" %, ");
+  Serial.print("Temp: "); Serial.print(t); Serial.println(" C");
+
+  delay(5000); // Wait 5 seconds before next reading
+}
