@@ -1,0 +1,51 @@
+module jk_ff(clk, reset, j, k, q, qb);
+  input clk, reset, j, k;
+  output q, qb;
+  reg q;
+
+  always @(posedge clk)
+  begin
+    if (reset == 0)
+      q <= 0;
+    else
+    begin
+      if (j==0 & k==0) q <= q;
+      if (j==0 & k==1) q <= 1'b0;
+      if (j==1 & k==0) q <= 1'b1;
+      if (j==1 & k==1) q <= ~q;
+    end
+  end
+
+  assign qb = ~q;
+endmodule
+###############TEST BENCH############
+
+
+module jkff_test();
+  reg clk, reset, j, k;
+  wire q, qm;
+
+  jk_ff jkff1 (clk, reset, j, k, q, qb);
+
+  initial begin
+    clk <= 1'b0;
+  end
+
+  always begin
+    #5 clk <= ~clk;
+  end
+
+  initial begin
+    reset = 1'b0; j = 1'b0; k = 1'b0;
+    #10 j = 1'b1; k = 1'b1;
+    #10 j = 1'b1; k = 1'b0;
+    #10 reset = 1'b1; j = 1'b0; k = 1'b0;
+    #10 j = 1'b0; k = 1'b1;
+    #10 j = 1'b1; k = 1'b0;
+    #10 j = 1'b1; k = 1'b1;
+  end
+
+  initial begin
+    #100 $finish;
+  end
+endmodule
