@@ -1,0 +1,37 @@
+module d_ff(clk, reset, din, q, qb);
+  input clk, reset, din;
+  output reg q;
+  output qb;
+  always @(posedge clk)
+  begin
+    if (reset == 1'b1)
+      q <= 1'b0;
+    else
+      q <= din;
+  end
+  assign qb = ~q;
+endmodule
+
+#############TEST BENCH############
+module dff_tb();
+  reg reset, clk, din;
+  wire q, qb;
+  d_ff d1(clk, reset, din, q, qb);
+  initial begin
+    clk = 1'b0;
+  end
+  always begin
+    #5 clk <= ~clk;
+  end
+  initial begin
+    reset = 1'b0;
+    din = 1'b1;
+    #10 din = 1'b1;
+    #10 reset = 1'b1;
+    din = 1'b0;
+    #10 din = 1'b1;
+  end
+  initial begin
+    #100 $finish;
+  end
+endmodule
