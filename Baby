@@ -1,0 +1,139 @@
+#include <DHT.h>
+#include <SoftwareSerial.h>
+
+// --------------------------------------
+// GSM Setup (SIM900A)
+// --------------------------------------
+SoftwareSerial gsm(10, 11);  // RX = 10, TX = 11
+String phone = "+91XXXXXXXXXX";  // <-- Put your mobile number here
+bool smsSent = false;
+
+// --------------------------------------
+// Pins
+// --------------------------------------
+#define SOIL_PIN A0
+#define SOUND_A_PIN A1
+#define SOUND_D_PIN 2
+#define DHT_PIN 3
+#define MOTOR_PIN 9
+#define BUZZER_PIN 7
+
+// DHT11 setup
+#define DHTTYPE DHT11
+DHT dht(DHT_PIN, DHTTYPE);
+
+// Thresholds
+float TEMP_THRESHOLD_C = 30.0;   
+int SOIL_DRY_THRESHOLD = 600;
+
+// Variables
+bool motorState = false;
+unsigned long motorOnSince = 0;
+unsigned long MIN_MOTOR_ON_MS = 2000;
+
+void setup() {
+  Serial.begin(115200);
+  gsm.begin(9600);
+
+  pinMode(MOTOR_PIN, OUTPUT);
+  pinMode(BUZZER_PIN, OUTPUT);
+  pinMode(SOUND_D_PIN, INPUT);
+
+  digitalWrite(MOTOR_PIN, LOW);
+  digitalWrite(BUZZER_PIN, LOW);
+
+  dht.begin();
+  Serial.println("System Ready with GSM Alerts");
+
+  delay(2000);
+}
+
+void loop() {
+
+  // ------------------- Temperature -------------------
+  float tempC = dht.readTemperature();
+  float hum = dht.readHumidity();
+
+  if (isnan(tempC)) {
+    Serial.println("DHT error");
+    delay(1000);
+    return;
+  }
+
+  // ------------------- Soil -------------------
+  int soilVal = analogRead(SOIL_PIN);
+
+  // ------------------- Display -------------------
+  Serial.print("Temp: "); Serial.print(tempC);
+  Serial.print(" | Soil: "); Serial.print(soilVal);
+  Serial.print(" | Hum: "); Serial.println(hum);
+
+  // ----------------------------------------------------
+  // 🔔 SOIL DRY → Alarm + SMS
+  // ----------------------------------------------------
+  if (soilVal >= SOIL_DRY_THRESHOLD) {
+    digitalWrite(BUZZER_PIN, HIGH);
+
+    if (!smsSent) {
+      sendSMS("Alert: Soil is dry! Please water the plant.");
+      smsSent = true;
+    }
+
+  } else {
+    digitalWrite(BUZZER_PIN, LOW);
+    smsSent = false;   // Reset so next time SMS will send again
+  }
+
+  // ----------------------------------------------------
+  // 🔥 HIGH TEMPERATURE → Motor ON
+  // ----------------------------------------------------
+  if (tempC >= TEMP_THRESHOLD_C) {
+    if (!motorState) {
+      motorOnSince = millis();
+      setMotor(true);
+    }
+  } else {
+    if (motorState && (millis() - motorOnSince >= MIN_MOTOR_ON_MS)) {
+      setMotor(false);
+    }
+  }
+
+  delay(1000);
+}
+
+// ----------------------------------------------------
+// GSM SEND SMS FUNCTION
+// ----------------------------------------------------
+void sendSMS(String msg) {
+  Serial.println("Sending SMS...");
+
+  gsm.println("AT+CMGF=1");
+  delay(1000);
+
+  gsm.print("AT+CMGS=\"");
+  gsm.print(phone);
+  gsm.println("\"");
+  delay(1000);
+
+  gsm.print(msg);
+  delay(500);
+
+  gsm.write(26);  // CTRL+Z to send SMS
+  delay(3000);
+
+  Serial.println("SMS Sent!");
+}
+
+// ----------------------------------------------------
+// Motor Control
+// ----------------------------------------------------
+void setMotor(bool on) {
+  motorState = on;
+  if (on) {
+    analogWrite(MOTOR_PIN, 255);
+    Serial.println(">>> MOTOR ON");
+  } else {
+    analogWrite(MOTOR_PIN, 0);
+    Serial.println(">>> MOTOR OFF");
+  }
+}
