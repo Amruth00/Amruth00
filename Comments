@@ -1,0 +1,154 @@
+1. GSM SIM900A → Arduino Uno
+
+Use SoftwareSerial: D10 & D11
+
+GSM Pin	Arduino Pin
+
+TXD	D10 (Arduino RX)
+RXD	D11 (Arduino TX)
+GND	GND
+
+
+⚠ IMPORTANT
+
+GSM must be powered by 12V 1A or 12V 2A adapter.
+
+Do NOT power GSM from Arduino 5V.
+
+
+If GSM is not powered properly → SMS will not come.
+
+
+---
+
+🌡️ 2. DHT11 Temperature Sensor → Arduino
+
+DHT11 Pin	Arduino Pin
+
+VCC	5V
+DATA	D3
+GND	GND
+
+
+(Some sensors already have a pull-up resistor; if not, add 10k between DATA–VCC.)
+
+
+---
+
+🌱 3. Soil Moisture Sensor → Arduino
+
+Soil Sensor Pin	Arduino Pin
+
+VCC	5V
+GND	GND
+AOUT	A0
+
+
+This sensor gives value 0–1023.
+
+✔ High value = Dry
+✔ Low value = Wet
+
+
+---
+
+🔊 4. Sound Sensor (HW-484 v0.2) → Arduino
+
+Sound Pin	Arduino Pin
+
+VCC	5V
+GND	GND
+A0	A1 (analog sound level)
+D0	D2 (digital detection)
+
+
+
+---
+
+🚨 5. Buzzer → Arduino
+
+Buzzer Pin	Arduino Pin
+
++	D7
+–	GND
+
+
+Used only when soil is dry.
+
+
+---
+
+⚡ 6. Relay Module → Arduino
+
+Relay Pin	Arduino Pin
+
+IN	D9
+VCC	5V
+GND	GND
+
+
+👉 Arduino D9 controls motor ON/OFF.
+
+
+---
+
+🌀 7. Motor + Relay + Battery (MOST IMPORTANT)
+
+Relay Terminals:
+
+COM (Common)
+
+NO (Normally Open)
+
+NC (Normally Closed — not used)
+
+
+Correct motor connection:
+
+Relay Terminal	Connect To
+
+COM	Motor +
+NO	Battery + (12V)
+Motor –	Battery –
+Battery –	Arduino GND (COMMON GROUND)
+
+
+Why?
+
+When relay is OFF → NO is open → Motor OFF
+When relay is ON → NO connects → Motor gets power → Motor ON
+
+
+---
+
+🟧 8. POWER SUPPLY RULES (VERY IMPORTANT)
+
+✔ GSM: 12V 1A or 2A
+✔ Motor: 9–12V external battery
+✔ Arduino: USB or 5V
+✔ All GND must be connected together
+
+GSM GND → Arduino GND  
+Motor Battery – → Arduino GND  
+Soil/Sound/DHT11 GND → Arduino GND
+
+Without common GND → GSM won’t communicate, relay won’t switch, sensors give wrong values.
+
+
+---
+
+🌟 FULL CONNECTION SUMMARY (Short)
+
+Arduino Uno Pins
+
+A0 → Soil Sensor
+A1 → Sound Analog
+D2 → Sound Digital
+D3 → DHT11
+D7 → Buzzer
+D9 → Relay IN
+D10 → GSM TX
+D11 → GSM RX
+5V → All sensors + Relay VCC
+GND → All sensor grounds + Relay GND + GSM GND + Motor Battery –
+
