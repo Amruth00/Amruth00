@@ -1,0 +1,28 @@
+#include <SoftwareSerial.h>
+SoftwareSerial gsm(10, 11);  // RX=10, TX=11
+
+void setup() {
+  Serial.begin(9600);
+  gsm.begin(9600);
+  delay(2000);
+
+  Serial.println("Sending Test SMS...");
+
+  gsm.println("AT+CMGF=1");        // Text mode
+  delay(1000);
+
+  gsm.println("AT+CMGS=\"+91XXXXXXXXXX\"");  // Replace number
+  delay(1000);
+
+  gsm.println("Test SMS from Arduino!");
+  delay(500);
+
+  gsm.write(26);  // CTRL+Z
+  delay(3000);
+
+  Serial.println("SMS Sent");
+}
+
+void loop() {
+
+}
